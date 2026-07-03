@@ -389,6 +389,15 @@ button {
 
 .tool-row.checked span { text-decoration: line-through; color: var(--muted); }
 
+/* Build tab: option cards for an enabled calculator sit slightly inset
+   under its toggle card */
+.calc-section {
+  margin: -6px 0 12px;
+  padding-left: 10px;
+  border-left: 3px solid var(--accent);
+}
+.calc-section .card { margin-bottom: 10px; }
+
 /* empty state */
 .empty {
   text-align: center;

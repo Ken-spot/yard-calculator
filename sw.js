@@ -5,7 +5,7 @@
 // files and deletes the old cache. Users may need to close and reopen the
 // app once to pick up an update; that's normal service-worker behavior.
 
-const CACHE_NAME = 'yardcalc-v1';
+const CACHE_NAME = 'yardcalc-v2';
 
 const ASSETS = [
   './',
@@ -20,11 +20,25 @@ const ASSETS = [
   './js/engine/geometry.js',
   './js/engine/paver-calc.js',
   './js/engine/grass-calc.js',
+  './js/engine/mulch-calc.js',
+  './js/engine/gravel-calc.js',
+  './js/engine/concrete-calc.js',
+  './js/engine/fence-calc.js',
+  './js/engine/plants-calc.js',
+  './js/engine/sprinkler-calc.js',
   './js/ui/dom.js',
+  './js/ui/controls.js',
   './js/ui/projects-ui.js',
   './js/ui/shapes-ui.js',
+  './js/ui/build-ui.js',
   './js/ui/paver-ui.js',
   './js/ui/grass-ui.js',
+  './js/ui/mulch-ui.js',
+  './js/ui/gravel-ui.js',
+  './js/ui/concrete-ui.js',
+  './js/ui/fence-ui.js',
+  './js/ui/plants-ui.js',
+  './js/ui/sprinkler-ui.js',
   './js/ui/materials-ui.js',
   './js/ui/settings-ui.js',
   './icons/icon-192.png',

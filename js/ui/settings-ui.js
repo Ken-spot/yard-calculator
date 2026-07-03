@@ -4,7 +4,7 @@ import { el } from './dom.js';
 import { DEFAULT_PRICES } from '../engine/constants.js';
 import { storageAvailable } from '../storage.js';
 
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '1.1.0';
 
 export function renderSettingsTab(root, ctx) {
   root.innerHTML = '';
@@ -16,7 +16,12 @@ export function renderSettingsTab(root, ctx) {
     el('div', { class: 'hint', style: 'margin-bottom:8px' },
       'Used for the cost estimate. Update these after a store trip and every list gets more accurate.'));
 
+  let lastGroup = null;
   for (const [key, def] of Object.entries(DEFAULT_PRICES)) {
+    if (def.group !== lastGroup) {
+      priceCard.append(el('h3', {}, def.group));
+      lastGroup = def.group;
+    }
     const current = (typeof s.prices[key] === 'number') ? s.prices[key] : def.price;
     priceCard.append(el('div', { class: 'price-row' },
       el('label', { for: 'price-' + key }, def.label),

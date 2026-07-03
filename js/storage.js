@@ -45,6 +45,9 @@ export function makeId() {
   return (crypto.randomUUID?.() ?? 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2));
 }
 
+// Keys of the per-calculator option blocks on a project.
+export const CALC_KEYS = ['paver', 'grass', 'mulch', 'gravel', 'concrete', 'fence', 'plants', 'sprinkler'];
+
 export function defaultProject(name = 'My backyard') {
   const now = new Date().toISOString();
   return {
@@ -54,7 +57,7 @@ export function defaultProject(name = 'My backyard') {
     updatedAt: now,
     shapes: [],
     paver: {
-      enabled: true,
+      enabled: false,
       preset: '12x12',
       customWIn: 12,
       customLIn: 12,
@@ -65,14 +68,33 @@ export function defaultProject(name = 'My backyard') {
       edgingExcludeFt: 0,
     },
     grass: {
-      enabled: true,
+      enabled: false,
       mode: 'seed',
       grassType: 'sun_shade_mix',
       topsoilDepthIn: 3,
       seedCover: 'straw',
     },
+    mulch: { enabled: false, type: 'hardwood', depthIn: 3, fabric: true },
+    gravel: { enabled: false, type: 'crushed', depthIn: 3, fabric: true },
+    concrete: { enabled: false, thicknessIn: 4, base: true, mesh: true, forms: true },
+    fence: { enabled: false, lengthFt: null, spacingFt: 8, style: 'panels', gates: 1, railsPerSection: 2 },
+    plants: { enabled: false, layout: 'grid', spacingFt: 3, rowLengthFt: null, soilBags: true },
+    sprinkler: { enabled: false, type: 'rotor', supplyGpm: 12 },
     toolsChecked: {},
   };
+}
+
+// Fill in anything missing on projects saved by older app versions,
+// keeping every value the user already set.
+function ensureProjectDefaults(p) {
+  const d = defaultProject();
+  const merged = { ...d, ...p };
+  for (const key of CALC_KEYS) {
+    merged[key] = { ...d[key], ...(p?.[key] ?? {}) };
+  }
+  merged.shapes = Array.isArray(p?.shapes) ? p.shapes : [];
+  merged.toolsChecked = (p?.toolsChecked && typeof p.toolsChecked === 'object') ? p.toolsChecked : {};
+  return merged;
 }
 
 export function defaultSettings() {
@@ -81,7 +103,8 @@ export function defaultSettings() {
 
 export function loadProjects() {
   const list = read(KEYS.projects, null);
-  return Array.isArray(list) && list.length ? list : [defaultProject()];
+  if (!Array.isArray(list) || !list.length) return [defaultProject()];
+  return list.map(ensureProjectDefaults);
 }
 
 export function saveProjects(projects) {

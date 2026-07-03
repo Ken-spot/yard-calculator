@@ -1,8 +1,10 @@
 # Yard Tools
 
 A phone-friendly web app that calculates the full DIY materials list (with cost
-estimates and Home Depot / Lowe's search links) for paver patios/walkways and
-new grass (seed or sod).
+estimates and Home Depot / Lowe's search links) for yard projects. Eight
+calculators: pavers, grass (seed or sod), mulch, gravel/rock, concrete slabs,
+fences, tree & bush spacing, and sprinklers (rotor, spray, drip, or hose-end).
+Turn on whichever calculators a project needs in the Build tab.
 
 **Live app:** hosted on GitHub Pages — open it in Safari on the iPhone, tap
 Share → **Add to Home Screen**, and it behaves like a regular app (works offline).

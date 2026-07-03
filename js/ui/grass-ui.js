@@ -1,58 +1,22 @@
-// Grass tab: seed vs sod, grass type, topsoil, seed cover.
+// Grass section (Build tab): seed vs sod, grass type, topsoil, seed cover.
 
 import { el } from './dom.js';
 import { GRASS_TYPES, getPrices } from '../engine/constants.js';
 import { calcGrassMaterials } from '../engine/grass-calc.js';
 import { summarizeShapes } from '../engine/geometry.js';
-import { fmtSqFt, fmtQty } from '../format.js';
+import { makeControls, previewCard } from './controls.js';
 
-export function renderGrassTab(root, ctx) {
-  root.innerHTML = '';
+export function renderGrassSection(root, ctx) {
   const gr = ctx.project.grass;
   const sum = summarizeShapes(ctx.project.shapes);
 
-  // --- enable toggle ---
-  root.append(el('div', { class: 'card' },
-    el('div', { class: 'switch-row' },
-      el('span', { class: 'lab' }, 'This project includes grass'),
-      el('label', { class: 'switch' },
-        el('input', {
-          type: 'checkbox',
-          checked: gr.enabled,
-          onchange: (e) => { gr.enabled = e.target.checked; ctx.save(); ctx.rerender(); },
-        }),
-        el('span', { class: 'knob' })))));
+  const preview = previewCard(ctx, () => calcGrassMaterials({
+    areaSqFt: sum.netSqFt,
+    options: gr,
+    prices: getPrices(ctx.settings.prices),
+  }), 'Add shapes in the Area tab to see quantities.');
 
-  if (!gr.enabled) {
-    root.append(el('div', { class: 'empty' },
-      el('div', { class: 'big' }, '🌱'),
-      el('div', {}, 'Grass is off for this project.')));
-    return;
-  }
-
-  const preview = el('div', { class: 'card' });
-  const updatePreview = () => {
-    const res = calcGrassMaterials({
-      areaSqFt: sum.netSqFt,
-      options: gr,
-      prices: getPrices(ctx.settings.prices),
-    });
-    preview.innerHTML = '';
-    preview.append(el('h2', {}, 'Quick preview'));
-    if (!res.lines.length) {
-      preview.append(el('div', { class: 'muted' }, 'Add shapes in the Area tab to see quantities.'));
-    } else {
-      const top = res.lines.slice(0, 3).map(l => `${fmtQty(l.qty)} ${l.unit} — ${l.label}`);
-      preview.append(
-        el('div', { class: 'muted' }, `${fmtSqFt(sum.netSqFt)} sq ft of new lawn:`),
-        el('ul', { style: 'margin:6px 0 10px; padding-left:20px' }, top.map(t => el('li', {}, t))),
-        el('button', { class: 'btn primary wide', onclick: () => ctx.switchTab('list') }, 'See full materials list'));
-    }
-  };
-
-  const select = (value, onVal, options, parse = (x) => x) => el('select', {
-    onchange: (e) => { onVal(parse(e.target.value)); ctx.save(); updatePreview(); },
-  }, options.map(([v, label]) => el('option', { value: v, selected: String(value) === String(v) }, label)));
+  const { select } = makeControls(ctx, preview.update);
 
   // --- seed vs sod ---
   const segBtn = (mode, text) => el('button', {
@@ -101,6 +65,5 @@ export function renderGrassTab(root, ctx) {
         [4, '4 in — poor or rocky soil'],
       ], parseFloat))));
 
-  root.append(preview);
-  updatePreview();
+  root.append(preview.card);
 }

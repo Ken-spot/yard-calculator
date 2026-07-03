@@ -8,8 +8,7 @@ import { summarizeShapes } from './engine/geometry.js';
 import { fmtSqFt } from './format.js';
 import { el } from './ui/dom.js';
 import { renderAreaTab } from './ui/shapes-ui.js';
-import { renderPaverTab } from './ui/paver-ui.js';
-import { renderGrassTab } from './ui/grass-ui.js';
+import { renderBuildTab } from './ui/build-ui.js';
 import { renderListTab } from './ui/materials-ui.js';
 import { renderSettingsTab } from './ui/settings-ui.js';
 
@@ -27,8 +26,7 @@ let currentTab = 'area';
 
 const TABS = {
   area: renderAreaTab,
-  pavers: renderPaverTab,
-  grass: renderGrassTab,
+  build: renderBuildTab,
   list: renderListTab,
   settings: renderSettingsTab,
 };

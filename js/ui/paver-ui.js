@@ -1,80 +1,32 @@
-// Pavers tab: paver size, base depths, waste, edging.
+// Pavers section (Build tab): paver size, base depths, waste, edging.
 
 import { el } from './dom.js';
 import { PAVER_PRESETS, getPrices } from '../engine/constants.js';
 import { calcPaverMaterials } from '../engine/paver-calc.js';
 import { summarizeShapes } from '../engine/geometry.js';
-import { fmtSqFt, fmtQty } from '../format.js';
+import { fmtSqFt } from '../format.js';
+import { makeControls, previewCard } from './controls.js';
 
-export function renderPaverTab(root, ctx) {
-  root.innerHTML = '';
+export function renderPaverSection(root, ctx) {
   const pv = ctx.project.paver;
   const sum = summarizeShapes(ctx.project.shapes);
 
-  // --- enable toggle ---
-  root.append(el('div', { class: 'card' },
-    el('div', { class: 'switch-row' },
-      el('span', { class: 'lab' }, 'This project includes pavers'),
-      el('label', { class: 'switch' },
-        el('input', {
-          type: 'checkbox',
-          checked: pv.enabled,
-          onchange: (e) => { pv.enabled = e.target.checked; ctx.save(); ctx.rerender(); },
-        }),
-        el('span', { class: 'knob' })))));
+  const preview = previewCard(ctx, () => calcPaverMaterials({
+    areaSqFt: sum.netSqFt,
+    perimeterFt: sum.perimeterFt,
+    options: pv,
+    prices: getPrices(ctx.settings.prices),
+  }), 'Add shapes in the Area tab to see quantities.');
 
-  if (!pv.enabled) {
-    root.append(el('div', { class: 'empty' },
-      el('div', { class: 'big' }, '🧱'),
-      el('div', {}, 'Pavers are off for this project.')));
-    return;
-  }
-
-  const preview = el('div', { class: 'card' });
-  const updatePreview = () => {
-    const res = calcPaverMaterials({
-      areaSqFt: sum.netSqFt,
-      perimeterFt: sum.perimeterFt,
-      options: pv,
-      prices: getPrices(ctx.settings.prices),
-    });
-    preview.innerHTML = '';
-    preview.append(el('h2', {}, 'Quick preview'));
-    if (!res.lines.length) {
-      preview.append(el('div', { class: 'muted' }, 'Add shapes in the Area tab to see quantities.'));
-    } else {
-      const top = res.lines.slice(0, 3)
-        .map(l => `${fmtQty(l.qty)} ${l.unit} — ${l.label}`);
-      preview.append(
-        el('div', { class: 'muted' }, `${fmtSqFt(sum.netSqFt)} sq ft of pavers:`),
-        el('ul', { style: 'margin:6px 0 10px; padding-left:20px' }, top.map(t => el('li', {}, t))),
-        el('button', { class: 'btn primary wide', onclick: () => ctx.switchTab('list') }, 'See full materials list'));
-    }
-    res.warnings.forEach(w => preview.append(el('div', { class: 'warn', style: 'margin:8px 0 0' }, w)));
-  };
-
-  // number input helper: live update, no re-render (keeps keyboard focus)
-  const numInput = (value, onVal, attrs = {}) => el('input', {
-    type: 'number', inputmode: 'decimal', min: '0', step: 'any',
-    value: (value ?? '') === 0 ? '0' : (value ?? ''),
-    oninput: (e) => {
-      const v = parseFloat(e.target.value);
-      onVal(isFinite(v) ? v : null);
-      ctx.save();
-      updatePreview();
-    },
-    ...attrs,
-  });
+  const { numInput, select, selectRerender } = makeControls(ctx, preview.update);
 
   // --- paver size ---
-  const sizeCard = el('div', { class: 'card' }, el('h2', {}, 'Paver size'));
-  const presetSelect = el('select', {
-    onchange: (e) => { pv.preset = e.target.value; ctx.save(); ctx.rerender(); },
-  },
-    Object.entries(PAVER_PRESETS).map(([key, p]) =>
-      el('option', { value: key, selected: pv.preset === key }, p.label)),
-    el('option', { value: 'custom', selected: pv.preset === 'custom' }, 'Custom size…'));
-  sizeCard.append(el('div', { class: 'field' }, presetSelect));
+  const sizeCard = el('div', { class: 'card' }, el('h2', {}, 'Paver size'),
+    el('div', { class: 'field' },
+      selectRerender(pv.preset, v => pv.preset = v, [
+        ...Object.entries(PAVER_PRESETS).map(([key, p]) => [key, p.label]),
+        ['custom', 'Custom size…'],
+      ])));
 
   if (pv.preset === 'custom') {
     sizeCard.append(el('div', { class: 'row' },
@@ -88,26 +40,22 @@ export function renderPaverTab(root, ctx) {
   root.append(sizeCard);
 
   // --- base & waste ---
-  const depthSelect = (value, onVal, options) => el('select', {
-    onchange: (e) => { onVal(parseFloat(e.target.value)); ctx.save(); updatePreview(); },
-  }, options.map(([v, label]) => el('option', { value: v, selected: value === v }, label)));
-
   root.append(el('div', { class: 'card' },
     el('h2', {}, 'Base layers'),
     el('div', { class: 'field' },
       el('label', {}, 'Gravel base depth'),
-      depthSelect(pv.gravelDepthIn, v => pv.gravelDepthIn = v, [
+      select(pv.gravelDepthIn, v => pv.gravelDepthIn = v, [
         [4, '4 in — patios & walkways'],
         [6, '6 in — heavy use / soft soil'],
         [8, '8 in — driveways'],
-      ])),
+      ], parseFloat)),
     el('div', { class: 'field' },
       el('label', {}, 'Bedding sand depth'),
-      depthSelect(pv.sandDepthIn, v => pv.sandDepthIn = v, [
+      select(pv.sandDepthIn, v => pv.sandDepthIn = v, [
         [0.5, '½ in'],
         [1, '1 in — standard'],
         [1.5, '1½ in'],
-      ])),
+      ], parseFloat)),
     el('div', { class: 'field' },
       el('label', {}, 'Extra for cuts & breakage (%)'),
       numInput(pv.wastePct, v => pv.wastePct = v ?? 10),
@@ -127,6 +75,5 @@ export function renderPaverTab(root, ctx) {
       numInput(pv.edgingExcludeFt, v => pv.edgingExcludeFt = v ?? 0),
       el('div', { class: 'hint' }, 'For example, the side that sits against the house or an existing wall.'))));
 
-  root.append(preview);
-  updatePreview();
+  root.append(preview.card);
 }
