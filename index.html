@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Yard Tools</title>
+  <meta name="description" content="Materials calculator for DIY paver and grass projects">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2e7d32">
+
+  <!-- iOS home-screen install -->
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Yard Tools">
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>Yard Tools</h1>
+    <div class="area-chip" id="area-chip">0 sq ft</div>
+  </header>
+
+  <div id="banner"></div>
+
+  <main id="main">
+    <section class="tab" id="tab-area"></section>
+    <section class="tab" id="tab-pavers" hidden></section>
+    <section class="tab" id="tab-grass" hidden></section>
+    <section class="tab" id="tab-list" hidden></section>
+    <section class="tab" id="tab-settings" hidden></section>
+  </main>
+
+  <nav class="tabbar" id="tabbar">
+    <button data-tab="area" class="active"><span class="ticon">&#128207;</span>Area</button>
+    <button data-tab="pavers"><span class="ticon">&#129521;</span>Pavers</button>
+    <button data-tab="grass"><span class="ticon">&#127793;</span>Grass</button>
+    <button data-tab="list"><span class="ticon">&#129534;</span>List</button>
+    <button data-tab="settings"><span class="ticon">&#9881;&#65039;</span>Setup</button>
+  </nav>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
